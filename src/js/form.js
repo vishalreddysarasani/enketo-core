@@ -700,8 +700,9 @@ Form.prototype.setEventHandlers = function() {
 };
 
 Form.prototype.setValid = function( $node, type ) {
-    const classes = ( type ) ? `invalid-${type}` : 'invalid-constraint invalid-required invalid-relevant';
-    this.input.getWrapNodes( $node ).removeClass( classes );
+    const wrap = this.input.getWrapNodes( $node )[ 0 ]; // TODO: always single node?
+    const classes = type ? [ `invalid-${type}` ] : [ ...wrap.classList ].filter( cl => cl.indexOf( 'invalid-' ) === 0 );
+    wrap.classList.remove( ...classes );
 };
 
 Form.prototype.setInvalid = function( $node, type ) {
