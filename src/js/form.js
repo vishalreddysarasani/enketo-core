@@ -22,6 +22,8 @@ import events from './event';
 import './plugins';
 import './extend';
 
+let _constraintClasses = [ 'invalid-constraint' ];
+
 /**
  * Class: Form
  *
@@ -115,6 +117,12 @@ Form.prototype = {
     },
     get id() {
         return this.view.html.id;
+    },
+    get constraintClasses() {
+        return _constraintClasses;
+    },
+    set constraintClasses( arr ) {
+        _constraintClasses = arr;
     }
 };
 
@@ -705,9 +713,7 @@ Form.prototype.setValid = function( $node, type ) {
     wrap.classList.remove( ...classes );
 };
 
-Form.prototype.setInvalid = function( $node, type ) {
-    type = type || 'constraint';
-
+Form.prototype.setInvalid = function( $node, type = 'constraint' ) {
     if ( config.validatePage === false && this.isValid( $node ) ) {
         this.blockPageNavigation();
     }
@@ -737,6 +743,7 @@ Form.prototype.blockPageNavigation = function() {
  */
 Form.prototype.isValid = function( $node ) {
     let $question;
+    // TODO: may need to use [class^="invalid-"],[class*=" invalid-"] selector here which is slow (for the whole form in particular)
     if ( $node ) {
         $question = this.input.getWrapNodes( $node );
         return !$question.hasClass( 'invalid-required' ) && !$question.hasClass( 'invalid-constraint' ) && !$question.hasClass( 'invalid-relevant' );
@@ -799,6 +806,7 @@ Form.prototype.validateContent = function( $container ) {
 
     return Promise.all( validations )
         .then( () => {
+            // TODO: use [class^="invalid-"],[class*=" invalid-"] selector here with matches, and querySelector?
             $firstError = $container
                 .find( '.invalid-required, .invalid-constraint, .invalid-relevant' )
                 .addBack( '.invalid-required, .invalid-constraint, .invalid-relevant' )
@@ -847,6 +855,7 @@ Form.prototype.validateInput = function( $input ) {
         inputType: this.input.getInputType( $input ),
         xmlType: this.input.getXmlType( $input ),
         enabled: this.input.isEnabled( $input ),
+        // TODO: return array of objects with number of constraint and constraint expression?
         constraint: this.input.getConstraint( $input ),
         calculation: this.input.getCalculation( $input ),
         required: this.input.getRequired( $input ),
@@ -863,6 +872,7 @@ Form.prototype.validateInput = function( $input ) {
     if ( n.enabled && n.inputType !== 'hidden' ) {
         // Only now, will we determine the index.
         n.ind = this.input.getIndex( $input );
+        // TODO: pass array of constraints?
         getValidationResult = this.model.node( n.path, n.ind ).validate( n.constraint, n.required, n.xmlType );
     } else {
         getValidationResult = Promise.resolve( {
