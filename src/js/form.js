@@ -22,7 +22,7 @@ import events from './event';
 import './plugins';
 import './extend';
 
-let _constraintClasses = [ 'invalid-constraint' ];
+let _constraintNames = [ 'constraint' ];
 
 /**
  * Class: Form
@@ -118,11 +118,11 @@ Form.prototype = {
     get id() {
         return this.view.html.id;
     },
-    get constraintClasses() {
-        return _constraintClasses;
+    get constraintNames() {
+        return _constraintNames;
     },
-    set constraintClasses( arr ) {
-        _constraintClasses = arr;
+    set constraintNames( arr ) {
+        _constraintNames = arr;
     }
 };
 
