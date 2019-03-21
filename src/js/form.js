@@ -22,8 +22,6 @@ import events from './event';
 import './plugins';
 import './extend';
 
-let _constraintNames = [ 'constraint' ];
-
 /**
  * Class: Form
  *
@@ -118,12 +116,15 @@ Form.prototype = {
     get id() {
         return this.view.html.id;
     },
-    get constraintNames() {
-        return _constraintNames;
+    get constraintClassesInvalid() {
+        return Form.constraintNames.map( n => `invalid-${n}` );
     },
-    set constraintNames( arr ) {
-        _constraintNames = arr;
-    }
+    get constraintAttributes() {
+        return Form.constraintNames.map( n => `data-${n}` );
+    },
+    get constraintMessages() {
+        return Form.constraintNames.map( n => `or-${n}-msg` );
+    },
 };
 
 /**
@@ -990,5 +991,9 @@ Form.prototype.goToTarget = function( target ) {
  * Static method to obtain required enketo-transform version direct from class.
  */
 Form.requiredTransformerVersion = '1.30.1';
+/** 
+ * Static property to extend the engine with multiple constraints.
+ */
+Form.constraintNames = [ 'constraint' ];
 
 export { Form, FormModel };
