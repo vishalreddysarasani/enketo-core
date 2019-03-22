@@ -117,7 +117,7 @@ Form.prototype = {
         return this.view.html.id;
     },
     get constraintClassesInvalid() {
-        return Form.constraintNames.map( n => `invalid-${n}` );
+        return Form.constraintNames.map( n => `.invalid-${n}` );
     },
     get constraintAttributes() {
         return Form.constraintNames.map( n => `data-${n}` );
@@ -743,7 +743,7 @@ Form.prototype.blockPageNavigation = function() {
  * @return {!boolean} whether the question/form is not marked as invalid.
  */
 Form.prototype.isValid = function( $node ) {
-    const invalidSelector = [ 'invalid-required', 'invalid-relevant' ].concat( this.constraintClassesInvalid ).join( ', ' );
+    const invalidSelector = [ '.invalid-required', '.invalid-relevant' ].concat( this.constraintClassesInvalid ).join( ', ' );
     if ( $node ) {
         const question = this.input.getWrapNodes( $node )[ 0 ];
         return !question.matches( invalidSelector );
@@ -787,7 +787,7 @@ Form.prototype.validate = Form.prototype.validateAll;
  */
 Form.prototype.validateContent = function( $container ) {
     const that = this;
-    const invalidSelector = [ 'invalid-required', 'invalid-relevant' ].concat( this.constraintClassesInvalid ).join( ', ' );
+    const invalidSelector = [ '.invalid-required', '.invalid-relevant' ].concat( this.constraintClassesInvalid ).join( ', ' );
 
     //can't fire custom events on disabled elements therefore we set them all as valid
     $container.find( 'fieldset:disabled input, fieldset:disabled select, fieldset:disabled textarea, ' +
@@ -807,16 +807,13 @@ Form.prototype.validateContent = function( $container ) {
 
     return Promise.all( validations )
         .then( () => {
-            // TODO: use [class^="invalid-"],[class*=" invalid-"] selector here with matches, and querySelector?
-            const $firstError = $container
-                .find( invalidSelector )
-                .addBack( invalidSelector )
-                .eq( 0 );
+            const container = $container[ 0 ];
+            const firstError = container.matches( invalidSelector ) ? container : container.querySelector( invalidSelector );
 
-            if ( $firstError.length > 0 ) {
-                that.goToTarget( $firstError[ 0 ] );
+            if ( firstError ) {
+                that.goToTarget( firstError );
             }
-            return $firstError.length === 0;
+            return !firstError;
         } )
         .catch( () => // fail whole-form validation if any of the question
             // validations threw.
