@@ -599,8 +599,8 @@ Form.prototype.validationUpdate = function( updated ) {
         }
 
         // Find all inputs that have a dependency on the changed node.
-        $nodes = this.getRelatedNodes( 'data-constraint', '', upd )
-            .add( this.getRelatedNodes( 'data-required', '', upd ) );
+        $nodes = this.getRelatedNodes( 'data-required', '', upd );
+        this.constraintAttributes.forEach( attr => $nodes = $nodes.add( this.getRelatedNodes( attr, '', upd ) ) );
 
         $nodes.each( function() {
             that.validateInput( $( this ) );
@@ -743,13 +743,13 @@ Form.prototype.blockPageNavigation = function() {
  * @return {!boolean} whether the question/form is not marked as invalid.
  */
 Form.prototype.isValid = function( $node ) {
-    let $question;
-    // TODO: may need to use [class^="invalid-"],[class*=" invalid-"] selector here which is slow (for the whole form in particular)
+    const invalidSelector = [ 'invalid-required', 'invalid-relevant' ].concat( this.constraintClassesInvalid ).join( ', ' );
     if ( $node ) {
-        $question = this.input.getWrapNodes( $node );
-        return !$question.hasClass( 'invalid-required' ) && !$question.hasClass( 'invalid-constraint' ) && !$question.hasClass( 'invalid-relevant' );
+        const question = this.input.getWrapNodes( $node )[ 0 ];
+        return !question.matches( invalidSelector );
+
     }
-    return this.view.$.find( '.invalid-required, .invalid-constraint, .invalid-relevant' ).length === 0;
+    return !this.view.html.querySelector( invalidSelector );
 };
 
 Form.prototype.clearIrrelevant = function() {
@@ -786,8 +786,8 @@ Form.prototype.validate = Form.prototype.validateAll;
  * @return {Promise} wrapping {boolean} whether the container contains any errors
  */
 Form.prototype.validateContent = function( $container ) {
-    let $firstError;
     const that = this;
+    const invalidSelector = [ 'invalid-required', 'invalid-relevant' ].concat( this.constraintClassesInvalid ).join( ', ' );
 
     //can't fire custom events on disabled elements therefore we set them all as valid
     $container.find( 'fieldset:disabled input, fieldset:disabled select, fieldset:disabled textarea, ' +
@@ -808,9 +808,9 @@ Form.prototype.validateContent = function( $container ) {
     return Promise.all( validations )
         .then( () => {
             // TODO: use [class^="invalid-"],[class*=" invalid-"] selector here with matches, and querySelector?
-            $firstError = $container
-                .find( '.invalid-required, .invalid-constraint, .invalid-relevant' )
-                .addBack( '.invalid-required, .invalid-constraint, .invalid-relevant' )
+            const $firstError = $container
+                .find( invalidSelector )
+                .addBack( invalidSelector )
                 .eq( 0 );
 
             if ( $firstError.length > 0 ) {
