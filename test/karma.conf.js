@@ -1,6 +1,8 @@
 // Karma configuration
 // Generated on Mon Mar 16 2015 13:42:33 GMT-0600 (MDT)
 
+var istanbul = require('browserify-istanbul');
+
 module.exports = function( config ) {
 
     // Force timezone for tests, so that datetime conversion results are predictable
@@ -41,15 +43,45 @@ module.exports = function( config ) {
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            'test/**/*.js': [ 'browserify' ],
+            'test/**/*.js': [ 'browserify', 'coverage' ],
         },
 
 
         // test results reporter to use
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: [ 'progress' ],
+        reporters: [ 'progress', 'coverage' ],
 
+
+        browserify: {
+          debug: true,
+          transform: [istanbul({
+            ignore: [
+              'node_modules/**', 
+              'test/**',
+              // exclude libraries that ware copied into widgets
+              'src/widget/geo-esri/**',
+              'src/widget/time/timepicker.js'
+            ]
+          })],
+          extensions: ['js']
+        },
+
+        coverageReporter: {
+            dir: 'test-coverage',
+            reporters: [
+                // for in-depth analysis in your browser
+                {
+                    type: 'html',
+                    includeAllSources: true
+                },
+                // for displaying percentages summary in command line
+                {
+                    type: 'text-summary',
+                    includeAllSources: true
+                }
+            ]
+        },
 
         // web server port
         port: 9876,
@@ -76,7 +108,5 @@ module.exports = function( config ) {
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
         singleRun: false,
-
-        browserify: {},
     } );
 };
