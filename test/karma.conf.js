@@ -70,11 +70,12 @@ module.exports = function( config ) {
         coverageReporter: {
             dir: 'test-coverage',
             reporters: [
-                // for in-depth analysis in your browser
-                {
-                    type: 'html',
-                    includeAllSources: true
-                },
+                // DISABLED because of `ERROR [coverage]: TypeError: Cannot read property 'split' of undefined`
+                // // for in-depth analysis in your browser
+                // {
+                //     type: 'html',
+                //     includeAllSources: true
+                // },
                 // for displaying percentages summary in command line
                 {
                     type: 'text-summary',
