@@ -107,18 +107,17 @@ class DatepickerExtended extends Widget {
                 }
             }
 
+            $fakeDateI.val( this._toDisplayDate( convertedValue ) ).datepicker( 'update' );
+
             // Here we have to do something unusual to prevent native inputs from automatically
             // changing 2012-12-32 into 2013-01-01
             // convertedValue is '' for invalid 2012-12-32
-            if ( convertedValue === '' || this.originalInputValue !== convertedValue ) {
+            if ( this.originalInputValue !== convertedValue ) {
                 if ( e.type === 'paste' ) {
                     e.stopImmediatePropagation();
                 }
                 this.originalInputValue = convertedValue;
-                this.element.blur();
             }
-
-            $fakeDateI.val( this._toDisplayDate( convertedValue ) ).datepicker( 'update' );
 
             return false;
         } );
