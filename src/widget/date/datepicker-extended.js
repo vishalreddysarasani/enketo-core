@@ -112,10 +112,12 @@ class DatepickerExtended extends Widget {
             // Here we have to do something unusual to prevent native inputs from automatically
             // changing 2012-12-32 into 2013-01-01
             // convertedValue is '' for invalid 2012-12-32
+            if ( convertedValue === '' && e.type === 'paste' ) {
+                e.stopImmediatePropagation();
+            }
+
+            // Avoid triggering unnecessary change events as they mess up sensitive custom applications (OC)
             if ( this.originalInputValue !== convertedValue ) {
-                if ( e.type === 'paste' ) {
-                    e.stopImmediatePropagation();
-                }
                 this.originalInputValue = convertedValue;
             }
 
