@@ -281,6 +281,7 @@ export default {
         let validate;
 
         currentIndex = this._getCurrentIndex();
+        console.log(currentIndex);
         validate = ( config.validatePage === false ) ? Promise.resolve( true ) : this.form.validateContent( this.$current );
 
         return validate
@@ -297,6 +298,11 @@ export default {
                     newIndex = currentIndex + 1;
                     that._flipTo( next, newIndex );
                     //return newIndex;
+                } else {
+                    const isLast = localStorage.getItem('isLast');
+                    if (isLast === 'false') {
+                        this._updateForm(localStorage.getItem('currentStartIndex'), 'forward');
+                    }
                 }
 
                 return true;
@@ -308,9 +314,13 @@ export default {
     _prev() {
         const currentIndex = this._getCurrentIndex();
         const prev = this._getPrev( currentIndex );
-
         if ( prev ) {
             this._flipTo( prev, currentIndex - 1 );
+        } else {
+            const isFirst = localStorage.getItem('isFirst');
+            if (isFirst === 'false') {
+                this._updateForm(localStorage.getItem('previousStartIndex'),'backward');
+            }
         }
     },
     /**
@@ -387,9 +397,17 @@ export default {
         const i = index || this._getCurrentIndex(),
             next = this._getNext( i ),
             prev = this._getPrev( i );
-        this.$btnNext.add( this.$btnLast ).toggleClass( 'disabled', !next );
-        this.$btnPrev.add( this.$btnFirst ).toggleClass( 'disabled', !prev );
-        this.$formFooter.toggleClass( 'end', !next );
+        const isLast = localStorage.getItem('isLast');
+        const isFirst = localStorage.getItem('isFirst');
+        if (isLast === 'true') {
+            this.$btnNext.toggleClass( 'disabled', !next );
+            this.$formFooter.toggleClass( 'end', !next );
+        }
+        if (isFirst === 'true') {
+            this.$btnPrev.toggleClass( 'disabled', !prev );
+        }
+        this.$btnLast.toggleClass( 'disabled', !next );
+        this.$btnFirst.toggleClass( 'disabled', !prev );
     },
     /**
      * Updates Table of Contents
@@ -434,5 +452,42 @@ export default {
             items.appendChild( li );
         } );
         return items;
+    },
+    _updateForm(startIndex,moving) {
+        let form = document.getElementsByTagName('form')[0];
+        let formNodesArray = JSON.parse(localStorage.getItem('formNodesArray'));
+        startIndex = +startIndex;
+        localStorage.setItem('moving', moving);
+        form.innerHTML = '';
+        for (let i = 0; i < 2; i++) {
+            form.insertAdjacentHTML('beforeend', formNodesArray[i]);
+        }
+        const lastIndex = (startIndex + 3) > (formNodesArray.length - 1) ? (formNodesArray.length - 1) : (startIndex + 3)
+        for (let j = startIndex; j < lastIndex; j++) {
+            form.insertAdjacentHTML('beforeend', formNodesArray[j]);
+        }
+        if (lastIndex === formNodesArray.length - 1) {
+            localStorage.setItem('isLast', 'true');
+        } else {
+            localStorage.setItem('isLast', 'false');
+        }
+        localStorage.setItem('currentStartIndex', (startIndex + 3)+'');
+        if ((startIndex - 3) >= 2) {
+            localStorage.setItem('previousStartIndex', (startIndex - 3)+'');
+            localStorage.setItem('isFirst', 'false');
+        } else {
+            localStorage.setItem('isFirst', 'true');
+        }
+        if ('createEvent' in document) {
+            let evt = document.createEvent('HTMLEvents');
+            evt.initEvent('formUpdate', true, true);
+            evt.eventName = 'formUpdate';
+            form.dispatchEvent(evt);
+        } else {
+            let event = document.createEventObject();
+            event.eventName = 'formUpdate';
+            event.eventType = 'formUpdate';
+            form.fireEvent('on' + event.eventType, event);
+        }
     }
 };

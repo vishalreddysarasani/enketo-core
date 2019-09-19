@@ -1093,6 +1093,13 @@ Form.prototype.goToTarget = function( target ) {
 };
 
 /**
+ * Go to last page of the current loaded form
+ */
+Form.prototype.goToLastPage = function(){
+    this.pages._flipToLast();
+};
+
+/**
  * Static method to obtain required enketo-transform version direct from class.
  *
  * @type string
