@@ -159,6 +159,7 @@ export default {
      */
     _setTocHandlers() {
         const that = this;
+        this.$toc.off('click');
         this.$toc
             .on( 'click', 'a', function() {
                 if ( !that.form.pageNavigationBlocked ) {
